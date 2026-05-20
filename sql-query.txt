@@ -1,0 +1,93 @@
+-- ============================================================
+-- B-BOOK SUPABASE SCHEMA
+-- Run this in your Supabase SQL editor after creating a project
+-- ============================================================
+
+-- MOVES table: individual moves in your arsenal
+create table moves (
+  id uuid default gen_random_uuid() primary key,
+  user_id uuid references auth.users(id) on delete cascade,
+  name text not null,
+  category text not null check (category in ('toprock','godown','footwork','freeze','power','combo','idea')),
+  status text not null default 'learning' check (status in ('locked','learning','clean','battle-ready')),
+  notes text,
+  video_url text,
+  created_at timestamp with time zone default now(),
+  updated_at timestamp with time zone default now()
+);
+
+-- COMBOS table: sequences of moves
+create table combos (
+  id uuid default gen_random_uuid() primary key,
+  user_id uuid references auth.users(id) on delete cascade,
+  name text not null,
+  move_sequence jsonb default '[]',
+  notes text,
+  status text not null default 'draft' check (status in ('draft','working','polished')),
+  created_at timestamp with time zone default now(),
+  updated_at timestamp with time zone default now()
+);
+
+-- IDEAS table: unfinished concepts
+create table ideas (
+  id uuid default gen_random_uuid() primary key,
+  user_id uuid references auth.users(id) on delete cascade,
+  title text not null,
+  description text,
+  category text,
+  priority text default 'normal' check (priority in ('low','normal','high')),
+  created_at timestamp with time zone default now()
+);
+
+-- FOUNDATIONS table: core basics tracker
+create table foundations (
+  id uuid default gen_random_uuid() primary key,
+  user_id uuid references auth.users(id) on delete cascade,
+  skill text not null,
+  category text not null,
+  level integer default 0 check (level between 0 and 5),
+  notes text,
+  last_practiced date,
+  updated_at timestamp with time zone default now()
+);
+
+-- PROFILES table
+create table profiles (
+  id uuid references auth.users(id) primary key,
+  bboy_name text,
+  crew text,
+  years_training integer default 0,
+  style_notes text,
+  avatar_url text,
+  created_at timestamp with time zone default now()
+);
+
+-- Row Level Security: users only see their own data
+alter table moves enable row level security;
+alter table combos enable row level security;
+alter table ideas enable row level security;
+alter table foundations enable row level security;
+alter table profiles enable row level security;
+
+create policy "Users own their moves" on moves for all using (auth.uid() = user_id);
+create policy "Users own their combos" on combos for all using (auth.uid() = user_id);
+create policy "Users own their ideas" on ideas for all using (auth.uid() = user_id);
+create policy "Users own their foundations" on foundations for all using (auth.uid() = user_id);
+create policy "Users own their profile" on profiles for all using (auth.uid() = id);
+
+-- Auto-create profile on signup
+create or replace function public.handle_new_user()
+returns trigger as $$
+begin
+  insert into public.profiles (id)
+  values (new.id);
+  return new;
+end;
+$$ language plpgsql security definer;
+
+create trigger on_auth_user_created
+  after insert on auth.users
+  for each row execute procedure public.handle_new_user();
+
+-- Seed default foundations for new users (call this after first login)
+-- You can add these manually or via the app
