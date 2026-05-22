@@ -6,6 +6,7 @@ import Arsenal from './pages/Arsenal'
 import Combos from './pages/Combos'
 import Ideas from './pages/Ideas'
 import Foundations from './pages/Foundations'
+import Profile from './pages/Profile'
 import Nav from './components/Nav'
 import './App.css'
 import { supabase } from './supabase/supabase'
@@ -35,7 +36,7 @@ export default function App() {
 
   if (!session) return <Auth />
 
-  const pages = { dashboard: Dashboard, arsenal: Arsenal, combos: Combos, ideas: Ideas, foundations: Foundations }
+  const pages = { dashboard: Dashboard, arsenal: Arsenal, combos: Combos, ideas: Ideas, foundations: Foundations, profile: Profile }
   const PageComponent = pages[page] || Dashboard
 
   return (
