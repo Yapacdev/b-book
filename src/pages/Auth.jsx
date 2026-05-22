@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import { supabase } from '../supabase/supabase'
+import { FcGoogle } from 'react-icons/fc'
 
 export default function Auth() {
   const [mode, setMode] = useState('login') // 'login' | 'signup'
@@ -23,6 +24,16 @@ export default function Auth() {
     setLoading(false)
   }
 
+  async function signInWithGoogle() {
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: window.location.origin
+      }
+    })
+
+    if (error) setError(error.message)
+  }
   return (
     <div className="auth-page">
       <div className="auth-box">
@@ -49,6 +60,39 @@ export default function Auth() {
             <button className="btn btn-primary" type="submit" style={{ width: '100%', justifyContent: 'center' }} disabled={loading}>
               {loading ? 'Loading...' : mode === 'login' ? 'Sign In' : 'Create Account'}
             </button>
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                marginBlock: 12,
+                gap: 12
+              }}
+            >
+              <div style={{ flex: 1, height: 1, background: '#222' }} />
+              <span style={{ color: '#777', fontSize: 12 }}>OR</span>
+              <div style={{ flex: 1, height: 1, background: '#222' }} />
+            </div>
+            <button
+              type="button"
+              className="btn"
+              onClick={signInWithGoogle}
+              style={{
+                width: '100%',
+                justifyContent: 'center',
+                marginBottom: 18,
+                background: '#fff',
+                color: '#111',
+                border: '1px solid #E5E7EB',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 10,
+                fontWeight: 600
+              }}
+            >
+              <FcGoogle size={22} />
+              Continue with Google
+            </button>
+
           </form>
           <div className="auth-toggle">
             {mode === 'login' ? (
