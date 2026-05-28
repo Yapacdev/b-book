@@ -184,7 +184,7 @@ export default function Profile({ session, setPage }) {
 
         <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
           <button type="submit" className="btn btn-primary" disabled={saving}>
-            {saving ? 'Saving...' : 'Save Profile'}
+            {saving ? <span class="loader"></span> : 'Save Profile'}
           </button>
           {saved && (
             <span style={{ fontSize: 13, color: '#10B981', fontWeight: 500 }}>

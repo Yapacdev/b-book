@@ -375,7 +375,7 @@ function ComboModal({ uid, combo, onClose, onSaved }) {
           <div className="modal-actions">
             <button type="button" className="btn btn-ghost" onClick={handleClose}>Cancel</button>
             <button type="submit" className="btn btn-primary" disabled={saving}>
-              {saving ? 'Saving...' : isNew ? 'Create Combo' : 'Save Changes'}
+              {saving ? <span class="loader"></span> : isNew ? 'Create Combo' : 'Save Changes'}
             </button>
           </div>
         </form>

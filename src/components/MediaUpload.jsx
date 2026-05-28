@@ -1,13 +1,83 @@
 import React, { useState, useRef } from 'react'
 import { supabase } from '../supabase/supabase'
 
-// Renders uploaded media inline
+
+function extractStoragePath(url) {
+  try {
+    const marker = '/bbook-media/'
+    const idx = url.indexOf(marker)
+    if (idx === -1) return null
+    // Strip query string (signed token)
+    const raw = url.slice(idx + marker.length)
+    return raw.split('?')[0]
+  } catch {
+    return null
+  }
+}
+
+// ─────────────────────────────────────────────
+// Delete a single media item — DB row + Storage file
+// ─────────────────────────────────────────────
+export async function deleteMedia(item) {
+  const path = extractStoragePath(item.file_url)
+  // Delete from Storage first (non-blocking failure is okay)
+  if (path) {
+    await supabase.storage.from('bbook-media').remove([path])
+  }
+  // Always delete the DB record
+  await supabase.from('media').delete().eq('id', item.id)
+}
+
+// ─────────────────────────────────────────────
+// Delete ALL media for an entity (call before deleting a move/combo/idea)
+// ─────────────────────────────────────────────
+export async function deleteEntityMedia(entityType, entityId) {
+  // Fetch all media records for this entity
+  const { data: items } = await supabase
+    .from('media')
+    .select('*')
+    .eq('entity_type', entityType)
+    .eq('entity_id', entityId)
+
+  if (!items || items.length === 0) return
+
+  // Extract storage paths and remove from Storage in one batch call
+  const paths = items.map(i => extractStoragePath(i.file_url)).filter(Boolean)
+  if (paths.length > 0) {
+    await supabase.storage.from('bbook-media').remove(paths)
+  }
+
+  // Delete all DB rows for this entity
+  await supabase.from('media')
+    .delete()
+    .eq('entity_type', entityType)
+    .eq('entity_id', entityId)
+}
+
+// ─────────────────────────────────────────────
+// Load media for a given entity
+// ─────────────────────────────────────────────
+export async function loadMedia(entityType, entityId) {
+  const { data } = await supabase.from('media')
+    .select('*')
+    .eq('entity_type', entityType)
+    .eq('entity_id', entityId)
+    .order('created_at', { ascending: true })
+  return data || []
+}
+
+// ─────────────────────────────────────────────
+// MediaPreview — renders images, videos, audio inline
+// ─────────────────────────────────────────────
 export function MediaPreview({ items, onDelete }) {
   if (!items || items.length === 0) return null
   return (
     <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginTop: 12 }}>
       {items.map(item => (
-        <div key={item.id} style={{ position: 'relative', borderRadius: 6, overflow: 'hidden', border: '1px solid var(--border)' }}>
+        <div key={item.id} style={{
+          position: 'relative', borderRadius: 6,
+          overflow: 'hidden', border: '1px solid var(--border)'
+        }}>
           {item.file_type === 'image' && (
             <img src={item.file_url} alt={item.file_name}
               style={{ width: 100, height: 100, objectFit: 'cover', display: 'block' }} />
@@ -40,7 +110,9 @@ export function MediaPreview({ items, onDelete }) {
   )
 }
 
-// Upload button + progress
+// ─────────────────────────────────────────────
+// MediaUpload — file picker + upload to Supabase Storage
+// ─────────────────────────────────────────────
 export function MediaUpload({ entityType, entityId, userId, onUploaded }) {
   const [uploading, setUploading] = useState(false)
   const [error, setError] = useState('')
@@ -68,16 +140,12 @@ export function MediaUpload({ entityType, entityId, userId, onUploaded }) {
 
       if (uploadError) { setError(uploadError.message); continue }
 
-      const { data: { publicUrl } } = supabase.storage
-        .from('bbook-media')
-        .getPublicUrl(path)
-
-      // Use signed URL instead since bucket is private
+      // Use signed URL (bucket is private)
       const { data: signedData } = await supabase.storage
         .from('bbook-media')
-        .createSignedUrl(path, 60 * 60 * 24 * 7) // 7 days
+        .createSignedUrl(path, 60 * 60 * 24 * 365) // 1 year
 
-      const fileUrl = signedData?.signedUrl || publicUrl
+      const fileUrl = signedData?.signedUrl || ''
 
       const { data, error: dbError } = await supabase.from('media').insert({
         user_id: userId,
@@ -111,25 +179,11 @@ export function MediaUpload({ entityType, entityId, userId, onUploaded }) {
           opacity: uploading ? 0.6 : 1,
           fontFamily: 'Space Grotesk, sans-serif'
         }}>
-        {uploading ? '⏳ Uploading...' : '📎 Attach Media'}
+        {uploading
+          ? <><span className="loader loader-dark" style={{ borderTopColor: 'var(--text2)' }} /> Uploading</>
+          : '📎 Attach Media'}
       </label>
       {error && <div style={{ color: '#EF4444', fontSize: 11, marginTop: 4 }}>{error}</div>}
     </div>
   )
-}
-
-// Load media for a given entity
-export async function loadMedia(entityType, entityId) {
-  const { data } = await supabase.from('media')
-    .select('*')
-    .eq('entity_type', entityType)
-    .eq('entity_id', entityId)
-    .order('created_at', { ascending: true })
-  return data || []
-}
-
-// Delete a media item
-export async function deleteMedia(item) {
-  // Extract storage path from signed URL or reconstruct
-  await supabase.from('media').delete().eq('id', item.id)
 }
