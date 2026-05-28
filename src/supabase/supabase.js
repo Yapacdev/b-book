@@ -22,39 +22,3 @@ export const STATUSES = {
   clean: { label: 'Clean', color: '#059669', bg: '#D1FAE5' },
   'battle-ready': { label: 'Battle Ready', color: '#7C3AED', bg: '#EDE9FE' },
 }
-
-export const FOUNDATIONS_SEED = [
-  // Toprock
-  { skill: 'Indian Step', category: 'toprock' },
-  { skill: 'Cross Step', category: 'toprock' },
-  { skill: 'Side Step', category: 'toprock' },
-  { skill: 'Kick Forward', category: 'toprock' },
-  { skill: 'Front Step', category: 'toprock' },
-  // Go-Downs
-  { skill: 'Knee Drop', category: 'godown' },
-  { skill: 'Spin Down', category: 'godown' },
-  { skill: 'Hook (Half Sweep)', category: 'godown' },
-  { skill: 'Corkscrew', category: 'godown' },
-  // Footwork
-  { skill: '6-Step', category: 'footwork' },
-  { skill: '3-Step', category: 'footwork' },
-  { skill: 'CC (Crazy Commando)', category: 'footwork' },
-  { skill: 'Russian Step', category: 'footwork' },
-  { skill: 'Kick Out', category: 'footwork' },
-  { skill: 'Shuffle', category: 'footwork' },
-  { skill: '2-Step', category: 'footwork' },
-  // Freezes
-  { skill: 'Baby Freeze', category: 'freeze' },
-  { skill: 'Chair Freeze', category: 'freeze' },
-  { skill: 'Side Freeze', category: 'freeze' },
-  { skill: 'Head Freeze', category: 'freeze' },
-  { skill: 'Hand Freeze', category: 'freeze' },
-  { skill: 'Hollowback', category: 'freeze' },
-  // Power
-  { skill: 'Windmill', category: 'power' },
-  { skill: 'Headspin', category: 'power' },
-  { skill: 'Flare', category: 'power' },
-  { skill: 'Swipe', category: 'power' },
-  { skill: 'Backspin', category: 'power' },
-  { skill: 'Handspin (1990)', category: 'power' },
-]

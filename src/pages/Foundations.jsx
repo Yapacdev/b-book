@@ -329,10 +329,10 @@ function NotesModal({ uid, skill, existing, onClose, onSaved }) {
           <div className="modal-actions">
             <button type="button" className="btn btn-ghost" onClick={onClose}>Cancel</button>
             <button type="submit" className="btn btn-primary" disabled={saving}>
-              {saving ? 'Saving...' : 'Save Notes'}
+              {saving ? <span class="loader"></span> : 'Save Notes'}
             </button>
           </div>
-        </form>
+        </form>          
       </div>
     </div>
   )

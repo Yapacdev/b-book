@@ -300,7 +300,9 @@ export default function Dashboard({ session, setPage }) {
               </button>
             </div>
             {loading ? (
-              <div style={{ color: 'var(--text3)', fontSize: 12 }}>Loading...</div>
+              <div className="loading" style={{ display: 'flex', alignItems: 'center',  flexDirection: 'column', gap: 10 }}>
+                <span class="loader"></span> Loading dashboard...
+              </div>
             ) : (
               foundBreakdown.map(({ cat, rated, total, avg }) => (
                 <div key={cat} style={{ marginBottom: 12 }}>
