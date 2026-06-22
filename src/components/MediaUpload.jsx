@@ -43,9 +43,9 @@ async function uploadWithProgress(file, path, onProgress) {
       } else {
         try {
           const body = JSON.parse(xhr.responseText)
-          resolve({ path: null, error: body.message || 'Upload failed' })
+          resolve({ path: null, error: body.message || `Upload failed (${xhr.status})` })
         } catch {
-          resolve({ path: null, error: 'Upload failed' })
+          resolve({ path: null, error: `Upload failed (${xhr.status})` })
         }
       }
     })
