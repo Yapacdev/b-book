@@ -24,8 +24,8 @@ async function uploadWithProgress(file, path, onProgress) {
   const { data: { session } } = await supabase.auth.getSession()
   const token = session?.access_token
 
-  const supabaseUrl = process.env.REACT_APP_SUPABASE_URL
-  const anonKey    = process.env.REACT_APP_SUPABASE_ANON_KEY
+  const supabaseUrl = process.env.VITE_SUPABASE_URL
+  const anonKey    = process.env.VITE_SUPABASE_PUBLISHABLE_KEY
   const uploadUrl  = `${supabaseUrl}/storage/v1/object/bbook-media/${path}`
 
   return new Promise((resolve) => {
